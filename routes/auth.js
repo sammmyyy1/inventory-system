@@ -3,35 +3,33 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const User = require('../models/User');
 
-// GET: Register Page
+// GET: Show register page
 router.get('/register', (req, res) => {
     res.render('register');
 });
 
-// POST: Handle Registration
+// POST: Handle registration
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
-
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ username, password: hashedPassword });
         await user.save();
         res.redirect('/login');
     } catch (err) {
-        console.log(err);
-        res.send('Error registering user');
+        console.error(err);
+        res.send('Registration failed. Try a different username.');
     }
 });
 
-// GET: Login Page
+// GET: Show login page
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-// POST: Handle Login
+// POST: Handle login
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
     try {
         const user = await User.findOne({ username });
         if (!user) return res.send('User not found');
@@ -42,8 +40,8 @@ router.post('/login', async (req, res) => {
         req.session.userId = user._id;
         res.redirect('/dashboard');
     } catch (err) {
-        console.log(err);
-        res.send('Login error');
+        console.error(err);
+        res.send('Login error. Please try again.');
     }
 });
 
